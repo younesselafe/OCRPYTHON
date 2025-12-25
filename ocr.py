@@ -6,8 +6,7 @@ import numpy as np
 import json
 import re
 
-# --- CONFIGURATION ---
-# Si tu es sur Windows, décommente la ligne ci-dessous et mets ton propre chemin :
+
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def preprocess_image(pixmap):
@@ -50,10 +49,7 @@ def extract_semantic_data(text):
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     data["emails"] = re.findall(email_pattern, text)
 
-    # --- CORRECTION ICI ---
-    # On cherche un nombre (ex: 12.50) suivi optionnellement d'un espace 
-    # et d'un symbole (y compris '-' que Tesseract confond souvent avec €)
-    # ou même rien du tout.
+
     price_pattern = r'\b\d+[.,]\d{2}(?:\s?(?:€|\$|EUR|USD|-))?\b'
     
     found_prices = re.findall(price_pattern, text)
@@ -114,4 +110,5 @@ if __name__ == "__main__":
     if os.path.exists(input_file):
         process_document(input_file, output_format="json")
     else:
+
         print("Fichier introuvable.")
