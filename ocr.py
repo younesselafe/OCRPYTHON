@@ -32,32 +32,36 @@ def preprocess_image(pixmap):
 
 def extract_semantic_data(text):
     """
-    Étape 4 : Extraction sémantique (Version Améliorée).
+    Étape 4 : Extraction sémantique (Version Complète : Dates, Emails, Prix, Noms).
     """
     data = {
         "dates": [],
         "emails": [],
         "montants": [],
-        "raw_text": text.strip()
+        "noms": [],  
+        "contenu_structure": [ligne for ligne in text.split('\n') if ligne.strip() != ""]
     }
 
-    # Dates (inchangé)
+
     date_pattern = r'\b\d{2}[/-]\d{2}[/-]\d{4}\b'
     data["dates"] = re.findall(date_pattern, text)
 
-    # Emails (inchangé)
+
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     data["emails"] = re.findall(email_pattern, text)
 
-
+  
     price_pattern = r'\b\d+[.,]\d{2}(?:\s?(?:€|\$|EUR|USD|-))?\b'
-    
     found_prices = re.findall(price_pattern, text)
-    # On nettoie les résultats pour enlever le tiret '-' à la fin s'il y en a un
     data["montants"] = [p.replace('-', '€').strip() for p in found_prices]
 
-    return data
 
+    name_pattern = r'\b(?:M\.|Mme|Mr)\s+[A-Z][a-z]+(?:\s+[A-Z]\.?|\s+[A-Z][a-z]+)?'
+    
+    found_names = re.findall(name_pattern, text)
+    data["noms"] = found_names
+
+    return data
 def process_document(file_path, output_format="json"):
     """
     Orchestre tout le processus OCR.
@@ -78,7 +82,7 @@ def process_document(file_path, output_format="json"):
             processed_img = preprocess_image(pix)
             
             # 3. OCR (Extraction du texte de l'image)
-            # lang='fra' pour le français (si installé), sinon 'eng'
+            
             ocr_text = pytesseract.image_to_string(processed_img, lang='eng')
             
             # 4. Analyse sémantique
@@ -102,13 +106,12 @@ def process_document(file_path, output_format="json"):
         print(f"❌ Erreur : {e}")
         return None
 
-# --- MAIN ---
+
 if __name__ == "__main__":
-    # Test avec un fichier local (change le nom ici)
+    
     input_file = input("Entrez le chemin du fichier (PDF ou Image) : ").replace('"', '')
     
     if os.path.exists(input_file):
         process_document(input_file, output_format="json")
     else:
-
         print("Fichier introuvable.")
